@@ -4,12 +4,26 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import login_user,logout_user,login_manager,LoginManager
 from flask_login import login_required,current_user
+from sqlalchemy import create_engine
 import json
+import pymysql
+import os
+port = int(os.environ.get('PORT', 3306))
 
 # MY db connection
 local_server= True
-app = Flask(__name__)
+app = Flask(__name__, static_folder = "static", template_folder="templates")
 app.secret_key='tharani'
+conn = "mysql+pymysql://root:PASSWORD@127.0.0.1:3306/studentdbms"
+#conn = "mysql+pymysql://uwuviska8vxknzzq:qj0hZc160Eg66Pg2BJHX@bsiu3mas2qweutzfnaib-mysql.services.clever-cloud.com:3306/bsiu3mas2qweutzfnaib"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = conn
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = True
+db = SQLAlchemy(app)
+engine = create_engine(conn)
+connection = engine.raw_connection()
+cursor = connection.cursor()
 
 
 # this is for getting unique user access
@@ -24,8 +38,8 @@ def load_user(user_id):
 
 # app.config['SQLALCHEMY_DATABASE_URL']='mysql://username:password@localhost/databas_table_name'
 #app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:@localhost/studentdbms'
-app.config['SQLALCHEMY_DATABASE_URI']= 'mysql://uwvm6x6eyg1edbty:yPAJ1hvWhQsdWt0UoAae@bqzu7kbeceyfgthvifzz-mysql.services.clever-cloud.com:3306/bqzu7kbeceyfgthvifzz'
-db=SQLAlchemy(app)
+# app.config['SQLALCHEMY_DATABASE_URI']= 'mysql://uwvm6x6eyg1edbty:yPAJ1hvWhQsdWt0UoAae@bqzu7kbeceyfgthvifzz-mysql.services.clever-cloud.com:3306/bqzu7kbeceyfgthvifzz'
+# db=SQLAlchemy(app)
 
 # here we will create db models that is tables
 class Test(db.Model):
@@ -232,5 +246,6 @@ def test():
     except:
         return 'My db is not Connected'
 
-
-app.run(debug=True)    
+if __name__ == "__main__":
+    app.run(debug=True, host = '0.0.0.0', port = port)
+#app.run(debug=True)    
